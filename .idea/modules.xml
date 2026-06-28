@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/extendedessay.iml" filepath="$PROJECT_DIR$/.idea/extendedessay.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/lin-tang-gil.iml" filepath="$PROJECT_DIR$/.idea/lin-tang-gil.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/linear-tangent-python.iml" filepath="$PROJECT_DIR$/.idea/linear-tangent-python.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/real.iml" filepath="$PROJECT_DIR$/.idea/real.iml" />
+    </modules>
+  </component>
+</project>
