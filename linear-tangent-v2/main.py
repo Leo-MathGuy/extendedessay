@@ -345,8 +345,8 @@ def test_matrix(input_matrix, start_time_initial, state, max_workers=8):
     return input_matrix
 
 
-matrix_1 = make_test_matrix(-0.005, -0.01, 1.5, 5, 10, 8)
-results = test_matrix(matrix_1, 800, state, max_workers=2)
+matrix_1 = make_test_matrix(-0.005, -0.01, 1.5, 6, 6, 6)
+results = test_matrix(matrix_1, 800, state, max_workers=8)
 
 best_result = np.array([])
 best_velocity = 10000000

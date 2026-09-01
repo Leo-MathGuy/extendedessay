@@ -1,4 +1,6 @@
+from itertools import product
 from math import sqrt, ceil
+from multiprocessing import Pool, Lock
 from time import sleep
 from typing import Callable
 
@@ -315,6 +317,8 @@ def test_descent_pitch_law(
         dtype=object,
     )
     i = 1
+    last_w = None
+    switched_to_last = False
 
     while True:
         if get_state_altitude(state) > last_altitude:
@@ -346,12 +350,20 @@ def test_descent_pitch_law(
         u = a / np.linalg.norm(a)  # unit vector of a
 
         c = np.vdot(b, u)
-        proj = u * c  # Amount to shift velociy vector
+        proj = u * c  # Amount to shift velocity vector
 
         v = b - proj
-        w = v / np.linalg.norm(
-            v
-        )  # Perp. vector to ground, opposite direction of velocity
+
+        v_norm = np.linalg.norm(v)
+
+        if (v_norm < 20 and (last_w is not None)) or switched_to_last:
+            switched_to_last = True
+            w = last_w
+        else:
+            w = v / np.linalg.norm(
+                v
+            )  # Perp. vector to ground, opposite direction of velocity
+            last_w = w
 
         thrust_vector = np.cos(phi) * u + np.sin(phi) * w
         thrust_vector = thrust_vector / np.linalg.norm(thrust_vector)
@@ -406,33 +418,64 @@ def test_lin_tangent(
     return state, data
 
 
+def evaluate_params(params):
+    global lock
+
+    a, b, st = params
+    final_state, data = test_lin_tangent(
+        110000, np.array([0.0, 1400.0, 0.0]), a, b, st, 0.2, 1200
+    )
+    velocity = np.linalg.norm(final_state[3:6])
+    alt = get_state_altitude(final_state)
+
+    return {
+        "a": a,
+        "b": b,
+        "st": st,
+        "final_state": final_state,
+        "data": data,
+        "velocity": velocity,
+        "alt": alt,
+    }
+
+
 if __name__ == "__main__":
+    param_grid = list(
+        product(
+            np.linspace(0.0015, 0.0018, 5),
+            np.linspace(0.004, 0.008, 5),
+            np.linspace(400, 600, 5),
+        )
+    )
+
+    print(f"Total combinations to evaluate: {len(param_grid)}")
+
+    best_velocity = 100000
     best_state = None
     best_data = None
-    best_velocity = 100000
     best_args = [0, 0, 0]
-    for a in np.arange(0, 0.005, 0.00005):
-        for b in np.arange(0.001, 0.004, 0.0005):
-            for st in np.arange(400, 700, 10):
-                final_state, data = test_lin_tangent(
-                    110000, np.array([0.0, 1400.0, 0.0]), a, b, st, 0.3, 1200
-                )
-                velocity = np.linalg.norm(final_state[3:6])
-                alt = get_state_altitude(final_state)
 
-                print(f"Tried {a:.6f} {b:.6f} {st:.6f}s: {alt:.1f}m, {velocity:.1f}m/s")
+    i = 1
 
-                if alt > 2000:
-                    continue
+    with Pool(processes=12) as pool:
+        for result in pool.imap_unordered(evaluate_params, param_grid):
+            print(
+                f"{i:5.0f}: Tried {result['a']:.6f} {result['b']:.6f} {result['st']:.6f}s: "
+                f"{result['alt']:.1f}m, {result['velocity']:.1f}m/s"
+            )
+            i += 1
 
-                if velocity < best_velocity:
-                    best_velocity = velocity
-                    best_data = data
-                    best_state = final_state
-                    best_args = [a, b, st]
+            if result["alt"] > 2000:
+                continue
+
+            if result["velocity"] < best_velocity:
+                best_velocity = result["velocity"]
+                best_data = result["data"]
+                best_state = result["final_state"]
+                best_args = [result["a"], result["b"], result["st"]]
 
     print(
-        f"Final altitude in {best_args[0]:.6f} {best_args[1]:.6f} {best_args[2]:.6f}s - {get_state_altitude(best_state):.3d}m - {np.linalg.norm(best_state[3:6]):.3f}m/s"
+        f"Final altitude in {best_args[0]:.6f} {best_args[1]:.6f} {best_args[2]:.6f}s - {get_state_altitude(best_state):.3f}m - {np.linalg.norm(best_state[3:6]):.3f}m/s"
     )
 
     show_3d_plotly(best_data)

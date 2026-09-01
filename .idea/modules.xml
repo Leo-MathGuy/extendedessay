@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/extendedessay.iml" filepath="$PROJECT_DIR$/.idea/extendedessay.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/lin-tang-gil.iml" filepath="$PROJECT_DIR$/.idea/lin-tang-gil.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/linear-tangent-python.iml" filepath="$PROJECT_DIR$/.idea/linear-tangent-python.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/linear-tangent-v1.iml" filepath="$PROJECT_DIR$/.idea/linear-tangent-v1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/linear-tangent-v2.iml" filepath="$PROJECT_DIR$/.idea/linear-tangent-v2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/real.iml" filepath="$PROJECT_DIR$/.idea/real.iml" />
     </modules>
   </component>
