@@ -31,7 +31,7 @@ class ShipConfig:
         return self.engine_thrust / (self.engine_isp * g)
 
     def get_mass_flow(self, thrust: np.float64) -> np.float64:
-        return ShipConfig.max_mass_flow * (thrust / self.engine_thrust)
+        return self.max_mass_flow * (thrust / self.engine_thrust)
 
     def to_json(self) -> str:
         return json.dumps(
@@ -117,8 +117,8 @@ class State:
         """Get total current mass"""
         return self.min_mass + self.extra_mass
 
-    def altitude(self, world_config: WorldConfig) -> np.float64:
-        return norm(self.pos - world_config.moon_center)
+    def altitude(self, world_config: WorldConfig, radius: np.float64) -> np.float64:
+        return norm(self.pos - world_config.moon_center) - radius
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

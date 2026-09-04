@@ -1,11 +1,16 @@
+import logging
+
 import numpy as np
 from scipy import integrate
+from scipy.integrate._ivp.ivp import OdeResult
 from scipy.linalg import norm
 
 from data_types import State, Vector3D, Vector6D, WorldConfig, ShipConfig
 
 integration_modes = ["RK23", "RK45", "DOP853"]
 using_mode = integration_modes[1]
+
+l = logging.getLogger("l")
 
 
 def integrate_state(
@@ -26,12 +31,12 @@ def integrate_state(
         state_cur = State.from_vector(
             y, state.min_mass, state.extra_mass - expended_mass
         )
-        return state.dx_dt(world_config, control)
+        return state_cur.dx_dt(world_config, control)
 
-    solution = integrate.solve_ivp(
+    solution: OdeResult[np.float64] = integrate.solve_ivp(
         fun=fun, y0=state.x, t_span=(0, dt), method=using_mode
     )
 
     return State.from_vector(
-        solution.y[0], state.min_mass, state.extra_mass - mass_flow * dt
+        solution.y[:, -1].copy(), state.min_mass, state.extra_mass - mass_flow * dt
     )

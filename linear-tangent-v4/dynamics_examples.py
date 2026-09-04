@@ -1,7 +1,7 @@
 import logging
 
 import numpy as np
-from numpy import linalg
+from numpy.linalg import norm
 
 import constants
 import integrator
@@ -43,10 +43,10 @@ def simulate_dynamics(
     time: np.float64,
     dt: float,
     log: int = 0,
-) -> list[State]:
+) -> tuple[float, list[State]]:
     initial_state, world_cfg, ship_cfg = get_state_orbital(altitude, velocity)
 
-    i_f = (np.ceil(time / dt)) + 1
+    i_f = int((np.ceil(time / dt)) + 1)
     result = np.ndarray((i_f, 2), dtype=object)
 
     cur_state = initial_state
@@ -59,18 +59,47 @@ def simulate_dynamics(
         )
         t += dt
         i += 1
-        result[i] = np.arange([t, cur_state], dtype=object)
+        result[i] = np.array([t, cur_state], dtype=object)
 
-        if log == 2 and i % 50 or log == 1 and i % round(i / i_f / 100) == 0:
+        if log == 2 and i % 500 == 0 or log == 1 and i % round(i / i_f * 100) == 0:
             l.info(
                 "{}% {}s Simulation - Alt {} ; Vel {}".format(
                     round(i / i_f * 100, 2),
                     round(t, 3),
-                    cur_state.altitude(world_cfg),
-                    linalg.norm(cur_state.vel),
+                    cur_state.altitude(world_cfg, constants.MOON_RADIUS),
+                    norm(cur_state.vel),
                 )
             )
 
     result[i + 1 :] = np.array([-1, None], dtype=object)
 
-    return result
+    return result.tolist()
+
+
+def test_orbit(
+    altitude: np.float64, velocity: np.float64, time_f: np.float64, dt: np.float64
+):
+    l.info("Starting simulation")
+    l.info(
+        " - Altitude {}km ; Velocity {}m/s ; Simulating {} minutes at dt {}s".format(
+            round(altitude / 1000, 3),
+            round(velocity),
+            round(time_f / 60, 1),
+            dt,
+        )
+    )
+    data = simulate_dynamics(altitude, velocity, time_f, dt, 2)
+    initial_state, world_cfg, ship_cfg = get_state_orbital(altitude, velocity)
+
+    data = list(filter(lambda x: x[0] >= 0, data))
+    last_state: State = data[-1][1]
+
+    l.info("Finished simulation")
+    l.info(
+        " - Altitude {}km ; Velocity {}m/s ; Simulating {} minutes at dt {}s".format(
+            round(last_state.altitude(world_cfg, constants.MOON_RADIUS) / 1000, 3),
+            round(norm(last_state.vel), 1),
+            round(data[-1][0] / 60, 1),
+            dt,
+        )
+    )
