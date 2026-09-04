@@ -43,7 +43,7 @@ def simulate_dynamics(
     time: np.float64,
     dt: float,
     log: int = 0,
-) -> tuple[float, list[State]]:
+) -> list[tuple[float, State]]:
     initial_state, world_cfg, ship_cfg = get_state_orbital(altitude, velocity)
 
     i_f = int((np.ceil(time / dt)) + 1)
@@ -78,7 +78,7 @@ def simulate_dynamics(
 
 def test_orbit(
     altitude: np.float64, velocity: np.float64, time_f: np.float64, dt: np.float64
-):
+) -> list[tuple[float, State]]:
     l.info("Starting simulation")
     l.info(
         " - Altitude {}km ; Velocity {}m/s ; Simulating {} minutes at dt {}s".format(
@@ -103,3 +103,5 @@ def test_orbit(
             dt,
         )
     )
+
+    return data
