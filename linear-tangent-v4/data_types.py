@@ -20,6 +20,24 @@ class WorldConfig:
         self.moon_mass: np.float64 = moon_mass
         self.moon_radius: np.float64 = moon_radius
 
+    def to_json(self) -> str:
+        return json.dumps(
+            {
+                "center": self.moon_center.tolist(),
+                "mass": np.float64(self.moon_mass),
+                "radius": np.float64(self.moon_radius),
+            }
+        )
+
+    @classmethod
+    def from_json(cls, json_str: str) -> Self:
+        data_dict = json.loads(json_str)
+        return cls(
+            moon_center=np.array(data_dict["center"], dtype=np.float64),
+            moon_mass=np.float64(data_dict["mass"]),
+            moon_radius=np.float64(data_dict["radius"]),
+        )
+
 
 class ShipConfig:
     def __init__(self, engine_thrust: np.float64, engine_isp: np.float64):
@@ -44,7 +62,10 @@ class ShipConfig:
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         data_dict = json.loads(json_str)
-        return cls(engine_thrust=data_dict["thrust"], engine_isp=data_dict["isp"])
+        return cls(
+            engine_thrust=np.float64(data_dict["thrust"]),
+            engine_isp=np.float64(data_dict["isp"]),
+        )
 
 
 class State:
@@ -117,8 +138,8 @@ class State:
         """Get total current mass"""
         return self.min_mass + self.extra_mass
 
-    def altitude(self, world_config: WorldConfig, radius: np.float64) -> np.float64:
-        return norm(self.pos - world_config.moon_center) - radius
+    def altitude(self, world_config: WorldConfig) -> np.float64:
+        return norm(self.pos - world_config.moon_center) - world_config.moon_radius
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

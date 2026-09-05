@@ -61,12 +61,12 @@ def simulate_dynamics(
         i += 1
         result[i] = np.array([t, cur_state], dtype=object)
 
-        if log == 2 and i % 500 == 0 or log == 1 and i % round(i / i_f * 100) == 0:
+        if log == 2 and i % 500 == 0 or log == 1 and i % round(i_f / 100) == 0:
             l.info(
                 "{}% {}s Simulation - Alt {} ; Vel {}".format(
                     round(i / i_f * 100, 2),
                     round(t, 3),
-                    cur_state.altitude(world_cfg, constants.MOON_RADIUS),
+                    cur_state.altitude(world_cfg),
                     norm(cur_state.vel),
                 )
             )
@@ -76,9 +76,13 @@ def simulate_dynamics(
     return result.tolist()
 
 
-def test_orbit(
-    altitude: np.float64, velocity: np.float64, time_f: np.float64, dt: np.float64
-) -> list[tuple[float, State]]:
+def orbit_test(
+    altitude: np.float64,
+    velocity: np.float64,
+    time_f: np.float64,
+    dt: np.float64,
+    log: int = 2,
+) -> tuple[list[tuple[float, State]], WorldConfig, ShipConfig]:
     l.info("Starting simulation")
     l.info(
         " - Altitude {}km ; Velocity {}m/s ; Simulating {} minutes at dt {}s".format(
@@ -88,7 +92,7 @@ def test_orbit(
             dt,
         )
     )
-    data = simulate_dynamics(altitude, velocity, time_f, dt, 2)
+    data = simulate_dynamics(altitude, velocity, time_f, dt, log)
     initial_state, world_cfg, ship_cfg = get_state_orbital(altitude, velocity)
 
     data = list(filter(lambda x: x[0] >= 0, data))
@@ -97,11 +101,11 @@ def test_orbit(
     l.info("Finished simulation")
     l.info(
         " - Altitude {}km ; Velocity {}m/s ; Simulating {} minutes at dt {}s".format(
-            round(last_state.altitude(world_cfg, constants.MOON_RADIUS) / 1000, 3),
+            round(last_state.altitude(world_cfg) / 1000, 3),
             round(norm(last_state.vel), 1),
             round(data[-1][0] / 60, 1),
             dt,
         )
     )
 
-    return data
+    return data, world_cfg, ship_cfg
