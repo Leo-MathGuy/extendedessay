@@ -79,7 +79,11 @@ class State:
         v_z: np.float64,
         min_mass: np.float64,
         extra_mass: np.float64,
+        extra_data=None,
     ):
+        if extra_data is None:
+            extra_data = dict()
+
         self.p_x: np.float64 = p_x
         self.p_y: np.float64 = p_y
         self.p_z: np.float64 = p_z
@@ -93,11 +97,17 @@ class State:
         """Usable fuel mass"""
         self.extra_mass: np.float64 = extra_mass
 
+        self.extra_data = extra_data
+
     @classmethod
     def from_vector(
-        cls, state_vector: Vector6D, min_mass: np.float64, extra_mass: np.float64
+        cls,
+        state_vector: Vector6D,
+        min_mass: np.float64,
+        extra_mass: np.float64,
+        extra_data: dict = None,
     ) -> Self:
-        return State(*(state_vector.tolist()), min_mass, extra_mass)
+        return State(*(state_vector.tolist()), min_mass, extra_mass, extra_data)
 
     @property
     def x(self) -> Vector6D:
@@ -148,9 +158,10 @@ class State:
         vel = data_dict["vel"]
         min_mass = np.float64(data_dict["min_mass"])
         extra_mass = np.float64(data_dict["extra_mass"])
+        extra_data = data_dict["extra_data"]
 
         return cls.from_vector(
-            np.array([*pos, *vel], dtype=np.float64), min_mass, extra_mass
+            np.array([*pos, *vel], dtype=np.float64), min_mass, extra_mass, extra_data
         )
 
     def to_json(self) -> str:
@@ -158,12 +169,14 @@ class State:
         vel = self.vel.tolist()
         min_mass = self.min_mass
         extra_mass = self.extra_mass
+        extra_data = self.extra_data
 
         d = {
             "pos": pos,
             "vel": vel,
             "min_mass": min_mass,
             "extra_mass": extra_mass,
+            "extra_data": extra_data,
         }
 
         return json.dumps(d)
