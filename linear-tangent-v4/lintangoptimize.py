@@ -56,7 +56,9 @@ def simulate_dynamics_lintan(
         cur_vel = cur_state.vel
         reference_cur_vel = cur_vel if not terminal_pitch else reference_cur_vel
 
-        if norm(cur_vel) < 200:
+        cur_ground_norm = cur_ground / np.linalg.norm(cur_ground)
+        horizontal_vel = cur_vel - np.dot(cur_vel, cur_ground_norm) * cur_ground_norm
+        if norm(horizontal_vel) < 200:
             terminal_pitch = True
 
         cur_ground_proj = (
@@ -130,7 +132,7 @@ def lintang_orbit_test(
 ) -> tuple[list[tuple[float, State]], WorldConfig, ShipConfig]:
     altitude = constants.INITIAL_ALTITUDE
     velocity = constants.INITIAL_SPEED
-    time_f = 1000
+    time_f = 1800
 
     l.info("Starting simulation")
     l.info(
