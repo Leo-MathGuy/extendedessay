@@ -54,7 +54,7 @@ def simulate_dynamics(
     i = 0
     result[0] = np.array([0, initial_state], dtype=object)
     while t < time:
-        cur_state = integrator.integrate_state(
+        cur_state = integrator.integrate_state_rk4(
             cur_state, world_cfg, ship_cfg, np.array([0, 0, 0]), dt
         )
         t += dt

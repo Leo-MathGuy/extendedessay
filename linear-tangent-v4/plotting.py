@@ -253,7 +253,7 @@ def show_3d_plotly_trajectory_lintan(
     ]
     max_range = np.max(ranges)
 
-    around = max_range * 1.2
+    around = max_range * 0.6
 
     midpoints = [
         (np.max(d) + np.min(d)) / 2
@@ -274,6 +274,50 @@ def show_3d_plotly_trajectory_lintan(
             ),
         ),
         showlegend=True,
+    )
+
+    fig.show()
+
+
+def show_penalty_mesh(a_list, b_list, penalties):
+    import plotly.graph_objects as go
+
+    A, B = np.meshgrid(a_list, b_list, indexing="ij")
+
+    penalty_plot = penalties.astype(float).copy()
+    penalty_plot[penalty_plot == -1] = np.nan
+
+    fig = go.Figure(
+        data=[
+            go.Surface(
+                x=A,
+                y=B,
+                z=penalty_plot,
+                colorscale="Viridis",
+                colorbar=dict(title="Penalty"),
+                contours=dict(
+                    z=dict(
+                        show=True,
+                        usecolormap=True,
+                        highlightcolor="limegreen",
+                        project_z=True,
+                    )
+                ),
+                connectgaps=False,
+            )
+        ]
+    )
+
+    fig.update_layout(
+        title="Penalty Gradient Plane",
+        scene=dict(
+            xaxis_title="a",
+            yaxis_title="b",
+            zaxis_title="Penalty",
+            camera=dict(eye=dict(x=1.5, y=1.5, z=1.0)),
+        ),
+        width=900,
+        height=700,
     )
 
     fig.show()
