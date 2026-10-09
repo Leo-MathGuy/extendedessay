@@ -408,13 +408,13 @@ match option:
 
         ax1.plot(times, derivatives)
 
-        ax1.set_xlabel("Time")
-        ax1.set_ylabel("df/dx")
+        ax1.set_xlabel("Ignition Time")
+        ax1.set_ylabel("Penalty df/dx")
 
         ax2.plot(times, values)
 
-        ax2.set_xlabel("Time")
-        ax2.set_ylabel("f(x)")
+        ax2.set_xlabel("Ignition Time")
+        ax2.set_ylabel("Penalty f(x)")
 
         plt.tight_layout()
         plt.show()
