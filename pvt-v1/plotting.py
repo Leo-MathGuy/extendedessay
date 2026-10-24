@@ -145,7 +145,16 @@ def show_3d_plotly_trajectory_lintan(
 ):
     import plotly.graph_objects as go
 
-    thrusts = [np.array(d[1].extra_data["thrust"], np.float64) for d in data]
+    engine_start = data[0][1].extra_data.get("start_time", 0)
+
+    thrusts = [
+        (
+            np.array(d[1].extra_data["thrust"], np.float64)
+            if d[0] > engine_start
+            else np.array([0, 0, 0])
+        )
+        for d in data
+    ]
 
     df = pd.DataFrame(
         {
